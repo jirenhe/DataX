@@ -204,8 +204,10 @@ public class RocketmqReader extends Reader {
 
                     System.out.println("Consume from the queue: " + mq);
 
+                    boolean flag = true;
+
                     SINGLE_MQ:
-                    while (true) {
+                    while (flag) {
                         try {
                             PullResult pullResult = consumer.pullBlockIfNotFound(mq, null, getMessageQueueOffset(mq), 32);
 
@@ -257,10 +259,10 @@ public class RocketmqReader extends Reader {
 
                                         System.out.println("before recordSender send!");
                                         recordSender.sendToWriter(record);
-
                                         System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
 
                                     }
+                                    flag = false;
                                     break;
                                 case NO_MATCHED_MSG:
                                     break;
@@ -276,6 +278,7 @@ public class RocketmqReader extends Reader {
                         } catch (Throwable e) {
                             e.printStackTrace();
                             LOG.error("", e);
+                        } finally {
                         }
                     }
                 }
