@@ -216,9 +216,14 @@ public class RocketmqReader extends Reader {
                                 List<MessageExt> msgs = pullResult.getMsgFoundList();
                                 for (MessageExt msg : msgs) {
                                     String msgBody = new String(msg.getBody());
+                                    Map messageMap = null;
+                                    try {
+                                        messageMap = JSON.parseObject(msgBody);
+                                    } catch (Throwable e) {
+                                        continue;
+                                    }
                                     System.out.println("msgBody:" + msgBody);
                                     Map<String, Object> returnMap = new HashMap<String, Object>();
-                                    Map messageMap = JSON.parseObject(msgBody);
                                     String database = messageMap.get("_db_") + "";
                                     String table = messageMap.get("_table_") + "";
                                     String event = messageMap.get("_event_") + "";
