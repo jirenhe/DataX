@@ -219,11 +219,14 @@ public class RocketmqReader extends Reader {
                                     List<MessageExt> msgs = pullResult.getMsgFoundList();
                                     for (MessageExt msg : msgs) {
                                         String msgBody = new String(msg.getBody());
-                                        Map messageMap = null;
+                                        JSONObject messageMap = null;
                                         try {
-                                            messageMap = JSON.parseObject(msgBody);
+                                            messageMap = JSONObject.parseObject(msgBody);
                                         } catch (Throwable e) {
                                             System.out.println("msgBody parse error:" + msgBody);
+                                            continue;
+                                        }
+                                        if (StringUtils.isEmpty(messageMap.getString("order_id"))) {
                                             continue;
                                         }
                                         System.out.println("msgBody:" + msgBody);
@@ -235,9 +238,7 @@ public class RocketmqReader extends Reader {
                                         messageMap.remove("_table_");
                                         messageMap.remove("_event_");
 
-                                        Iterator<Map.Entry<Integer, Integer>> entries = messageMap.entrySet().iterator();
-                                        while (entries.hasNext()) {
-                                            Map.Entry<Integer, Integer> entry = entries.next();
+                                        for (Map.Entry<String, Object> entry : messageMap.entrySet()) {
                                             returnMap.put(database + "-" + table + "-" + entry.getKey(), entry.getValue());
                                         }
 
