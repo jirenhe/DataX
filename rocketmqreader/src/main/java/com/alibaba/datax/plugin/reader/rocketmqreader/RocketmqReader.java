@@ -276,7 +276,6 @@ public class RocketmqReader extends Reader {
                                     break;
                                 case NO_NEW_MSG:
                                     System.out.println("NO_NEW_MSG");
-                                    break SINGLE_MQ;
                                 case OFFSET_ILLEGAL:
                                     break;
                                 default:
