@@ -207,7 +207,7 @@ public class RocketmqReader extends Reader {
                     boolean flag = true;
 
                     SINGLE_MQ:
-                    while (flag) {
+                    while (true) {
                         try {
                             PullResult pullResult = consumer.pullBlockIfNotFound(mq, null, getMessageQueueOffset(mq), 32);
 
