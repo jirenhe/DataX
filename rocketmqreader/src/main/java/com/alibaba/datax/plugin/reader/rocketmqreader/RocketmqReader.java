@@ -226,14 +226,12 @@ public class RocketmqReader extends Reader {
                                             System.out.println("msgBody parse error:" + msgBody);
                                             continue;
                                         }
-                                        if (StringUtils.isEmpty(messageMap.getString("order_id"))) {
-                                            if (StringUtils.isEmpty(messageMap.getString("order_from"))
-                                                    || StringUtils.isEmpty(messageMap.getString("order_no"))
-                                                    || StringUtils.isEmpty(messageMap.getString("category"))
-                                                    || StringUtils.isEmpty(messageMap.getString("serve_type"))) {
-                                                System.out.println("------------" + msgBody);
-                                                continue;
-                                            }
+                                        if (StringUtils.isEmpty(messageMap.getString("order_id"))
+                                                || StringUtils.isEmpty(messageMap.getString("order_from"))
+                                                || StringUtils.isEmpty(messageMap.getString("order_no"))
+                                                || StringUtils.isEmpty(messageMap.getString("category"))
+                                                || StringUtils.isEmpty(messageMap.getString("serve_type"))) {
+                                            System.out.println("------------" + msgBody);
                                             continue;
                                         }
                                         System.out.println("msgBody:" + msgBody);
