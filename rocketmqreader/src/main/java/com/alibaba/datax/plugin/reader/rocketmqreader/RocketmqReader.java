@@ -259,6 +259,7 @@ public class RocketmqReader extends Reader {
                                         }
 
                                         System.out.println("before recordSender send!");
+                                        System.out.println("record is :" + record);
                                         recordSender.sendToWriter(record);
                                         flag = false;
                                         System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
