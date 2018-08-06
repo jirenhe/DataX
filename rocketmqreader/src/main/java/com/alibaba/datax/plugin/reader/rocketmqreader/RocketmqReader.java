@@ -249,8 +249,9 @@ public class RocketmqReader extends Reader {
                                                 record.addColumn(col);
                                             }
                                         }
-                                        recordSender.sendToWriter(record);
 
+                                        System.out.println("before recordSender send!");
+                                        recordSender.sendToWriter(record);
 
                                         System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
 
