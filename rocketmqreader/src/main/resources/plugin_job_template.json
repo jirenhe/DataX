@@ -1,0 +1,7 @@
+{
+    "name": "rocketmqreader",
+    "parameter": {
+        "sliceRecordCount": "",
+        "column": []
+    }
+}
