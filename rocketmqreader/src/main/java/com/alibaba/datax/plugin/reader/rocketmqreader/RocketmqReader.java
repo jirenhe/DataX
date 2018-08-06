@@ -204,75 +204,77 @@ public class RocketmqReader extends Reader {
 
                     System.out.println("Consume from the queue: " + mq);
 
+                    SINGLE_MQ:
+                    while (true) {
+                        try {
+                            PullResult pullResult = consumer.pullBlockIfNotFound(mq, null, getMessageQueueOffset(mq), 32);
 
-                    try {
-                        PullResult pullResult = consumer.pullBlockIfNotFound(mq, null, getMessageQueueOffset(mq), 32);
+                            System.out.println(pullResult);
+                            putMessageQueueOffset(mq, pullResult.getNextBeginOffset());
 
-                        System.out.println(pullResult);
-                        putMessageQueueOffset(mq, pullResult.getNextBeginOffset());
-
-                        switch (pullResult.getPullStatus()) {
-                            case FOUND:
-                                List<MessageExt> msgs = pullResult.getMsgFoundList();
-                                for (MessageExt msg : msgs) {
-                                    String msgBody = new String(msg.getBody());
-                                    Map messageMap = null;
-                                    try {
-                                        messageMap = JSON.parseObject(msgBody);
-                                    } catch (Throwable e) {
-                                        continue;
-                                    }
-                                    System.out.println("msgBody:" + msgBody);
-                                    Map<String, Object> returnMap = new HashMap<String, Object>();
-                                    String database = messageMap.get("_db_") + "";
-                                    String table = messageMap.get("_table_") + "";
-                                    String event = messageMap.get("_event_") + "";
-                                    messageMap.remove("_db_");
-                                    messageMap.remove("_table_");
-                                    messageMap.remove("_event_");
-
-                                    Iterator<Map.Entry<Integer, Integer>> entries = messageMap.entrySet().iterator();
-                                    while (entries.hasNext()) {
-                                        Map.Entry<Integer, Integer> entry = entries.next();
-                                        returnMap.put(database + "-" + table + "-" + entry.getKey(), entry.getValue());
-                                    }
-
-                                    LOG.info("mq msgbody:" + msgBody);
-                                    ArrayList recordColume = new ArrayList();
-                                    Record record = recordSender.createRecord();
-
-                                    for (String column : columns) {
-                                        if (StringUtils.isEmpty(returnMap.get(column) + "")) {
-                                            recordColume.add(null);
-                                            Column col = getColumn(column, returnMap.get(column));
-                                            record.addColumn(col);
-                                        } else {
-                                            recordColume.add(returnMap.get(column) + "");
-                                            Column col = getColumn(column, returnMap.get(column));
-                                            record.addColumn(col);
+                            switch (pullResult.getPullStatus()) {
+                                case FOUND:
+                                    List<MessageExt> msgs = pullResult.getMsgFoundList();
+                                    for (MessageExt msg : msgs) {
+                                        String msgBody = new String(msg.getBody());
+                                        Map messageMap = null;
+                                        try {
+                                            messageMap = JSON.parseObject(msgBody);
+                                        } catch (Throwable e) {
+                                            continue;
                                         }
+                                        System.out.println("msgBody:" + msgBody);
+                                        Map<String, Object> returnMap = new HashMap<String, Object>();
+                                        String database = messageMap.get("_db_") + "";
+                                        String table = messageMap.get("_table_") + "";
+                                        String event = messageMap.get("_event_") + "";
+                                        messageMap.remove("_db_");
+                                        messageMap.remove("_table_");
+                                        messageMap.remove("_event_");
+
+                                        Iterator<Map.Entry<Integer, Integer>> entries = messageMap.entrySet().iterator();
+                                        while (entries.hasNext()) {
+                                            Map.Entry<Integer, Integer> entry = entries.next();
+                                            returnMap.put(database + "-" + table + "-" + entry.getKey(), entry.getValue());
+                                        }
+
+                                        LOG.info("mq msgbody:" + msgBody);
+                                        ArrayList recordColume = new ArrayList();
+                                        Record record = recordSender.createRecord();
+
+                                        for (String column : columns) {
+                                            if (StringUtils.isEmpty(returnMap.get(column) + "")) {
+                                                recordColume.add(null);
+                                                Column col = getColumn(column, returnMap.get(column));
+                                                record.addColumn(col);
+                                            } else {
+                                                recordColume.add(returnMap.get(column) + "");
+                                                Column col = getColumn(column, returnMap.get(column));
+                                                record.addColumn(col);
+                                            }
+                                        }
+
+                                        System.out.println("before recordSender send!");
+                                        recordSender.sendToWriter(record);
+
+                                        System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
+
                                     }
+                                    break;
+                                case NO_MATCHED_MSG:
+                                    break;
+                                case NO_NEW_MSG:
+                                    break SINGLE_MQ;
+                                case OFFSET_ILLEGAL:
+                                    break;
+                                default:
+                                    break;
+                            }
 
-                                    System.out.println("before recordSender send!");
-                                    recordSender.sendToWriter(record);
-
-                                    System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
-
-                                }
-                                break;
-                            case NO_MATCHED_MSG:
-                                break;
-                            case NO_NEW_MSG:
-                                break;
-                            case OFFSET_ILLEGAL:
-                                break;
-                            default:
-                                break;
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                            LOG.error("", e);
                         }
-
-                    } catch (Throwable e) {
-                        e.printStackTrace();
-                        LOG.error("", e);
                     }
                 }
                 consumer.shutdown();
