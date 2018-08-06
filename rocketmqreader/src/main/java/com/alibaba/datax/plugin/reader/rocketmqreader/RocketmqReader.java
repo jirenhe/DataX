@@ -287,6 +287,7 @@ public class RocketmqReader extends Reader {
                             LOG.error("", e);
                         } finally {
                         }
+                        Thread.sleep(2000);
                     }
                 }
                 consumer.shutdown();
