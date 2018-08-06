@@ -227,6 +227,13 @@ public class RocketmqReader extends Reader {
                                             continue;
                                         }
                                         if (StringUtils.isEmpty(messageMap.getString("order_id"))) {
+                                            if (StringUtils.isEmpty(messageMap.getString("order_from"))
+                                                    || StringUtils.isEmpty(messageMap.getString("order_no"))
+                                                    || StringUtils.isEmpty(messageMap.getString("category"))
+                                                    || StringUtils.isEmpty(messageMap.getString("serve_type"))) {
+                                                System.out.println("------------" + msgBody);
+                                                continue;
+                                            }
                                             continue;
                                         }
                                         System.out.println("msgBody:" + msgBody);
@@ -250,7 +257,7 @@ public class RocketmqReader extends Reader {
                                             if (StringUtils.isEmpty(returnMap.get(column) + "")) {
                                                 recordColume.add(null);
                                                 Column col = getColumn(column, returnMap.get(column));
-                                                record.addColumn(col);
+//                                                record.addColumn(col);
                                             } else {
                                                 recordColume.add(returnMap.get(column) + "");
                                                 Column col = getColumn(column, returnMap.get(column));
