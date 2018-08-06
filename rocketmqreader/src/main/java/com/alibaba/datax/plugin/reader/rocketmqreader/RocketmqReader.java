@@ -206,7 +206,6 @@ public class RocketmqReader extends Reader {
 
                     boolean flag = true;
 
-                    SINGLE_MQ:
                     while (true) {
                         try {
                             PullResult pullResult = consumer.pullBlockIfNotFound(mq, null, getMessageQueueOffset(mq), 32);
@@ -290,6 +289,7 @@ public class RocketmqReader extends Reader {
                         Thread.sleep(2000);
                     }
                 }
+                System.out.println("shutdown ------");
                 consumer.shutdown();
             } catch (Throwable e) {
                 e.printStackTrace();
