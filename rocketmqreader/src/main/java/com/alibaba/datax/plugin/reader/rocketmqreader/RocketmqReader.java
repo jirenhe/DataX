@@ -221,6 +221,7 @@ public class RocketmqReader extends Reader {
                                         try {
                                             messageMap = JSON.parseObject(msgBody);
                                         } catch (Throwable e) {
+                                            System.out.println("msgBody parse error:" + msgBody);
                                             continue;
                                         }
                                         System.out.println("msgBody:" + msgBody);
@@ -264,6 +265,7 @@ public class RocketmqReader extends Reader {
                                 case NO_MATCHED_MSG:
                                     break;
                                 case NO_NEW_MSG:
+                                    System.out.println("NO_NEW_MSG");
                                     break SINGLE_MQ;
                                 case OFFSET_ILLEGAL:
                                     break;
