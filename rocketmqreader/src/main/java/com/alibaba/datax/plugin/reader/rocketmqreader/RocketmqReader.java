@@ -199,16 +199,15 @@ public class RocketmqReader extends Reader {
                 consumer.setNamesrvAddr("192.168.0.159:9876");
                 consumer.start();
                 Set<MessageQueue> mqs = consumer.fetchSubscribeMessageQueues("test111");
+                while (true) {
+                    for (MessageQueue mq : mqs) {
 
-                for (MessageQueue mq : mqs) {
+                        System.out.println("Consume from the queue: " + mq);
 
-                    System.out.println("Consume from the queue: " + mq);
+                        boolean flag = true;
 
-                    boolean flag = true;
-
-                    while (true) {
                         try {
-                            PullResult pullResult = consumer.pullBlockIfNotFound(mq, null, getMessageQueueOffset(mq), 32);
+                            PullResult pullResult = consumer.pull(mq, null, getMessageQueueOffset(mq), 32);
 
                             System.out.println(pullResult);
                             putMessageQueueOffset(mq, pullResult.getNextBeginOffset());
@@ -233,7 +232,7 @@ public class RocketmqReader extends Reader {
                                             System.out.println("------------" + msgBody);
                                             continue;
                                         }
-                                        System.out.println("msgBody:" + msgBody);
+//                                        System.out.println("msgBody:" + msgBody);
                                         Map<String, Object> returnMap = new HashMap<String, Object>();
                                         String database = messageMap.get("_db_") + "";
                                         String table = messageMap.get("_table_") + "";
@@ -246,7 +245,7 @@ public class RocketmqReader extends Reader {
                                             returnMap.put(database + "-" + table + "-" + entry.getKey(), entry.getValue());
                                         }
 
-                                        LOG.info("mq msgbody:" + msgBody);
+//                                        LOG.info("mq msgbody:" + msgBody);
                                         ArrayList recordColume = new ArrayList();
                                         Record record = recordSender.createRecord();
 
@@ -262,12 +261,11 @@ public class RocketmqReader extends Reader {
                                             }
                                         }
 
-                                        System.out.println("before recordSender send!");
+//                                        System.out.println("before recordSender send!");
                                         System.out.println("record is :" + record);
                                         recordSender.sendToWriter(record);
                                         flag = false;
-                                        recordSender.terminate();
-                                        System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
+//                                        System.out.printf(Thread.currentThread().getName() + " Receive New Messages: " + msgBody + "%n");
 
                                     }
                                     break;
@@ -284,16 +282,14 @@ public class RocketmqReader extends Reader {
                         } catch (Throwable e) {
                             e.printStackTrace();
                             LOG.error("", e);
-                        } finally {
                         }
-                        Thread.sleep(2000);
                     }
                 }
-                System.out.println("shutdown ------");
-                consumer.shutdown();
             } catch (Throwable e) {
                 e.printStackTrace();
                 LOG.error("", e);
+            } finally {
+                System.out.println("shutdown ------");
             }
 
 //            try {
